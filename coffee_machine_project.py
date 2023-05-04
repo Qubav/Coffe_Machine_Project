@@ -57,7 +57,7 @@ def calculate_value(c_amount: list):
 def report(resources: dict):
     """Function prints out resources."""
 
-    print(f"Water: {resources['water']}ml\nMilk: {resources['milk']}ml\nCoffee: {resources['coffee']}g\nMoney: ${resources['money']}")
+    print(f"Water: {resources['water']}ml\nMilk: {resources['milk']}ml\nCoffee: {resources['coffee']}g\n")
 
 def check_if_resources_are_sufficient(coffee: dict, resources: dict):
     """Function checks if resources are sufficient to make given coffee flavor cup. Function returns True if resources are sufficient or False if they are not sufficient."""
@@ -92,7 +92,6 @@ def update_resources(bought_flavor: dict, resources: dict,  refill: bool = False
             "water": resources["water"] - bought_flavor["water"] ,
             "milk": resources["milk"] - bought_flavor["milk"],
             "coffee": resources["coffee"] - bought_flavor["coffee"],
-            "money": resources["money"],
         }
         
     else:
@@ -100,7 +99,6 @@ def update_resources(bought_flavor: dict, resources: dict,  refill: bool = False
             "water": resources["water"] + bought_flavor["water"] ,
             "milk": resources["milk"] + bought_flavor["milk"],
             "coffee": resources["coffee"] + bought_flavor["coffee"],
-            "money": 0,
         }
     
     # returning dictionary with upgraded values
@@ -124,7 +122,7 @@ def compare_payment(cost: float, paid_money: float):
     
     return enough
 
-def coffee_ordering(c_resources: dict):
+def coffee_ordering(c_resources: dict, money: float):
     """Function performs tasks connected with ordering coffee and returns resources with updated values based on selling coffee."""
 
     # taking order from user
@@ -157,7 +155,7 @@ def coffee_ordering(c_resources: dict):
             
             # updating resources after making coffee
             new_resources = update_resources(coffee_flavors[flv_num], c_resources)
-            new_resources["money"] += cost
+            money += cost
 
             # communication
             print(f"Here is Your {coffee_flavors[flv_num]['name']}. Enjoy!\n")
@@ -165,7 +163,7 @@ def coffee_ordering(c_resources: dict):
             # time for user to see feedback given
             time.sleep(5)
 
-            return new_resources
+            return new_resources, money
 
         # if user didn't pay enough feedback and back to main menu
         else:
@@ -173,7 +171,7 @@ def coffee_ordering(c_resources: dict):
             # time for user to see feedback given
             time.sleep(5)
 
-            return c_resources
+            return c_resources, money
     
     # if resources aren't sufficient feedback and back to main menu
     else:
@@ -181,7 +179,7 @@ def coffee_ordering(c_resources: dict):
         # time for user to see feedback given
         time.sleep(5)
 
-        return c_resources
+        return c_resources, money
 
 
 def coffee_machine():
@@ -191,10 +189,10 @@ def coffee_machine():
     "water": 300,
     "milk": 200,
     "coffee": 100,
-    "money": 0,
     }
 
     machine_on = True
+    money = 0
 
     # main loop
     while machine_on:
@@ -204,15 +202,22 @@ def coffee_machine():
         # asking user for decision which action to perform
         decision = input("What would u like? Type:\n\"order\" -  to order coffee\n\"report\" - to show current resources values\n\"refill\" - to refill resources\n")
         
+        # money and off are not shown for user because only maintenance should use it
         if decision == "off":
 
             # changing value of variable responsible for loop repeating
             machine_on = False
 
+        elif decision == "money":
+
+            # printing value of money collected
+            print(f"Value of money collected in machine is: ${round(money, 2)}")
+            time.sleep(5)
+
         elif decision == "order":
 
             # using function to perform ordering operations
-           resources = coffee_ordering(resources)
+           resources, money = coffee_ordering(resources, money)
         
         elif decision == "refill":
             
@@ -226,11 +231,13 @@ def coffee_machine():
                "water": water_val,
                 "milk": milk_val,
                 "coffee": coffee_val,
-                "money": 0, 
             }
 
             # updated resources
             resources  = update_resources(refill_vals, resources, True)
+
+            # while refilling money is withdrawn from machine
+            money = 0
 
         else:
 
